@@ -8,3 +8,4 @@ nltk
 imbalanced-learn
 werkzeug
 gunicorn
+requests

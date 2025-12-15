@@ -11,6 +11,13 @@ from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 
+# Ensure models exist (download if missing)
+try:
+    from download_models import ensure_models
+    ensure_models()
+except Exception as e:
+    print(f"Note: Could not run download_models: {e}")
+
 # Load models and tokenizer
 lstm_model = load_model('models/lstm_model.h5')
 with open('models/tokenizer.pickle', 'rb') as file:
