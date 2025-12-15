@@ -31,10 +31,18 @@
         $(document).ready(function() {
             $('#analysis-form').on('submit', function(event) {
                 event.preventDefault();
+                $('#result').html('<div class="alert alert-info">Analyzing... 🤔</div>');
+                
                 const formData = $(this).serialize();
-                $.post('/analyze', formData, function(data) {
-                    $('#result').html(`<h3>Sentiment: ${data.sentiment}</h3>`);
-                });
+                $.post('/analyze', formData)
+                    .done(function(data) {
+                        const sentimentClass = data.sentiment.includes('Positive') ? 'success' : 'danger';
+                        $('#result').html(`<div class="alert alert-${sentimentClass}"><h3>Sentiment: ${data.sentiment}</h3></div>`);
+                    })
+                    .fail(function(xhr, status, error) {
+                        $('#result').html(`<div class="alert alert-danger"><strong>Error:</strong> ${error || 'Could not analyze sentiment. Please try again.'}</div>`);
+                        console.error('Error:', xhr.responseText);
+                    });
             });
         });
     </script>
