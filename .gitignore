@@ -1,0 +1,39 @@
+# Data files
+data/raw_data/
+data/processed_data/
+data/uploads/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+*.egg
+*.egg-info/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+*:Zone.Identifier
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
+
+# Environment
+.env
+.venv/
+venv/
+
+# Training scripts (not needed for deployment)
+logistic_regression.py
+lstm_model.py
+scripts/
+evaluate_model.ipynb
+

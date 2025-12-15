@@ -1,0 +1,10 @@
+flask
+tensorflow
+scikit-learn
+pandas
+numpy
+plotly
+nltk
+imbalanced-learn
+werkzeug
+gunicorn
