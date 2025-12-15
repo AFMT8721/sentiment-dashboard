@@ -5,8 +5,6 @@ from pathlib import Path
 
 GITHUB_RAW_BASE = "https://raw.githubusercontent.com/AFMT8721/sentiment-dashboard/main/models/"
 MODEL_FILES = [
-    "lstm_model.h5",
-    "tokenizer.pickle",
     "vectorizer.pickle",
     "best_logistic_regression_model.pickle"
 ]

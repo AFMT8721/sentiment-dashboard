@@ -2,9 +2,6 @@ from flask import Flask, request, render_template, jsonify
 import pickle
 import numpy as np
 import os
-os.environ['CUDA_VISIBLE_DEVICES'] = '-1'  # Force CPU mode
-from tensorflow.keras.models import load_model
-from tensorflow.keras.preprocessing.sequence import pad_sequences
 import plotly.express as px
 import pandas as pd
 from werkzeug.utils import secure_filename
@@ -18,10 +15,7 @@ try:
 except Exception as e:
     print(f"Note: Could not run download_models: {e}")
 
-# Load models, tokenizer, and vectorizer
-lstm_model = load_model('models/lstm_model.h5')
-with open('models/tokenizer.pickle', 'rb') as file:
-    tokenizer = pickle.load(file)
+# Load vectorizer and logistic regression model only (LSTM removed - too heavy)
 with open('models/vectorizer.pickle', 'rb') as file:
     vectorizer = pickle.load(file)
 with open('models/best_logistic_regression_model.pickle', 'rb') as file:
@@ -35,15 +29,8 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-# Preprocess text for LSTM
-def preprocess_text_lstm(text):
-    max_length = 200
-    sequences = tokenizer.texts_to_sequences([text])
-    padded_sequences = pad_sequences(sequences, maxlen=max_length, padding='post', truncating='post')
-    return padded_sequences
-
 # Preprocess text for Logistic Regression
-def preprocess_text_lr(text):
+def preprocess_text(text):
     return vectorizer.transform([text])
 
 @app.route('/')
@@ -53,18 +40,12 @@ def home():
 @app.route('/analyze', methods=['POST'])
 def analyze():
     text = request.form['text']
-    model_type = request.form['model_type']
-
-    if model_type == 'lstm':
-        preprocessed_text = preprocess_text_lstm(text)
-        prediction_prob = lstm_model.predict(preprocessed_text)
-        prediction = (prediction_prob > 0.5).astype(int)
-    else:
-        preprocessed_text = preprocess_text_lr(text)
-        prediction = logistic_regression_model.predict(preprocessed_text)
-
-    sentiment = 'Positive' if prediction[0] == 1 else 'Negative'
-
+    preprocessed_text = preprocess_text(text)
+    prediction = logistic_regression_model.predict(preprocessed_text)
+    
+    # Model returns string labels: 'positive' or 'negative'
+    sentiment = 'Positive 😊' if prediction[0].lower() == 'positive' else 'Negative 😞'
+    
     return jsonify({'sentiment': sentiment})
 
 @app.route('/visualize', methods=['GET'])
