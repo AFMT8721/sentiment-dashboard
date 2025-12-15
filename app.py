@@ -18,10 +18,12 @@ try:
 except Exception as e:
     print(f"Note: Could not run download_models: {e}")
 
-# Load models and tokenizer
+# Load models, tokenizer, and vectorizer
 lstm_model = load_model('models/lstm_model.h5')
 with open('models/tokenizer.pickle', 'rb') as file:
     tokenizer = pickle.load(file)
+with open('models/vectorizer.pickle', 'rb') as file:
+    vectorizer = pickle.load(file)
 with open('models/best_logistic_regression_model.pickle', 'rb') as file:
     logistic_regression_model = pickle.load(file)
 
@@ -33,12 +35,16 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-# Preprocess text
-def preprocess_text(text):
+# Preprocess text for LSTM
+def preprocess_text_lstm(text):
     max_length = 200
     sequences = tokenizer.texts_to_sequences([text])
     padded_sequences = pad_sequences(sequences, maxlen=max_length, padding='post', truncating='post')
     return padded_sequences
+
+# Preprocess text for Logistic Regression
+def preprocess_text_lr(text):
+    return vectorizer.transform([text])
 
 @app.route('/')
 def home():
@@ -49,12 +55,12 @@ def analyze():
     text = request.form['text']
     model_type = request.form['model_type']
 
-    preprocessed_text = preprocess_text(text)
-
     if model_type == 'lstm':
+        preprocessed_text = preprocess_text_lstm(text)
         prediction_prob = lstm_model.predict(preprocessed_text)
         prediction = (prediction_prob > 0.5).astype(int)
     else:
+        preprocessed_text = preprocess_text_lr(text)
         prediction = logistic_regression_model.predict(preprocessed_text)
 
     sentiment = 'Positive' if prediction[0] == 1 else 'Negative'
